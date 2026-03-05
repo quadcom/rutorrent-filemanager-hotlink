@@ -36,6 +36,31 @@ export function FileManagerActions() {
         return validation;
     }
 
+    this.doHotlink = function (checklist, path) {
+
+        let cPath = flm.getCurrentPath();
+        let destination = flm.stripJailPath(path.val());
+        let filePaths = flm.ui.dialogs.getCheckedList(checklist);
+
+        let validation = self.doValidation([
+            [!$type(filePaths) || filePaths.length === 0, theUILang.flm_empty_selection, checklist.find('input').get(0)],
+            [!flm.utils.isValidPath(destination), path.data("msgRequired"), path],
+            [destination === cPath, path.data("msgExists"), path]
+        ]);
+
+        filePaths = flm.ui.filenav.getSelectedTarget() ? flm.getFullPaths(filePaths) : filePaths;
+
+        validation.then(() => {
+            self.notify(theUILang.fStarts.hotlink + ": " + filePaths.length + " files");
+            return flm.api.hotlink(filePaths, destination);
+        }).done(function () {
+            flm.refreshIfCurrentPath(destination);
+            flm.actions.notify(theUILang.flm_popup_hotlink + ": " + filePaths.length, 'success', 10000);
+        });
+
+        return validation;
+    }
+
     self.doDelete = function (checklist) {
         let paths = flm.ui.dialogs.getCheckedList(checklist);
         const cPath = flm.getCurrentPath();

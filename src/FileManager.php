@@ -214,6 +214,31 @@ class FileManager
     }
 
     /**
+     * Create hard links for the given files/directories into $paths->to.
+     * Directories are mirrored and each file inside is hard-linked.
+     * Both source and destination must reside on the same filesystem.
+     *
+     * @param $paths
+     * @return array
+     * @throws Exception
+     */
+    public function hotlink($paths): array
+    {
+        $files = array_map([$this, 'currentDir'], (array)$paths->fls);
+        $to = $this->currentDir($paths->to);
+
+        if (count($files) > 1 && !$this->fs->isDir($to)) {
+            throw new Exception("Destination is not directory", 2);
+        } elseif (count($files) > 1) {
+            $to = FileUtil::addslash($to);
+        }
+
+        $task_info = $this->fs->hotlink($files, $to);
+
+        return $task_info;
+    }
+
+    /**
      * @param $paths
      * @return array
      * @throws Exception

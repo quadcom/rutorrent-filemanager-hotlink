@@ -90,6 +90,10 @@ export function FileManagerDialogs(browser) {
             modal: true,
             pathbrowse: true,
             template: "dialog-copy"
+        }, hotlink: {
+            modal: true,
+            pathbrowse: true,
+            template: "dialog-hotlink"
         }, console: {
             template: "dialog-console",
             persist: true

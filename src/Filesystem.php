@@ -47,9 +47,9 @@ class Filesystem
         return RemoteShell::test($path, 'd');
     }
 
-    public function rootPath($relative_path = null): string
+    public function rootPath($relative_path = '/'): string
     {
-        return ($relative_path == null)
+        return ($relative_path == null || $relative_path == '/')
             ? $this->root
             : FileUtil::fullpath(trim($relative_path, '/'), $this->root);
     }
@@ -88,6 +88,36 @@ class Filesystem
 
         $rtask = TaskController::task([
             'name' => 'copy',
+            'arg' => count($files) . ' files'
+        ]);
+
+        return $rtask->start($commands, rTask::FLG_DEFAULT ^ rTask::FLG_ECHO_CMD);
+    }
+
+    /**
+     * Hard-link files (and recursively mirror directories) into $dest.
+     * Uses `cp -rl` which creates hard links for all files while mirroring
+     * directory structure. Source and destination must be on the same filesystem.
+     */
+    public function hotlink($files, $dest): array
+    {
+        $to = $this->rootPath($dest);
+
+        $commands = ['echo ' . Helper::mb_escapeshellarg('-> ' . $dest)];
+        foreach ($files as $file) {
+            $commands[] = "printf '%s' " . Helper::mb_escapeshellarg(basename($file) . " ... ");
+            $commands[] = ShellCmds::hardLink($this->rootPath($file), $to)
+                ->cmd();
+
+            $commands =
+                array_merge($commands,
+                    ["{", 'echo ' . Helper::mb_escapeshellarg("✔"), '}'],
+                    ['!{', 'echo ' . Helper::mb_escapeshellarg("✖"), '}']
+                );
+        }
+
+        $rtask = TaskController::task([
+            'name' => 'hotlink',
             'arg' => count($files) . ' files'
         ]);
 

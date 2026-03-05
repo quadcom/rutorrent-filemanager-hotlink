@@ -305,6 +305,7 @@ export function FsBrowser(fm) {
 
 
             menu.push([theUILang.fCopy, "flm.ui.getDialogs().showDialog('copy')"]);
+            menu.push([theUILang.fHotlink, "flm.ui.getDialogs().showDialog('hotlink')"]);
             menu.push([theUILang.fMove, "flm.ui.getDialogs().showDialog('move')"]);
             menu.push([theUILang.fDelete, "flm.ui.getDialogs().showDialog('delete')"]);
             menu.push([theUILang.fRename, (entries.length > 1) ? null : "flm.ui.getDialogs().showDialog('rename')"]);

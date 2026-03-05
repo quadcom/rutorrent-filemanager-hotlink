@@ -131,6 +131,22 @@ class WebController extends BaseController
         return $task;
     }
 
+    public function filesHotlink($params)
+    {
+
+        if (!isset($params->fls) || (count($params->fls) < 1)) {
+            self::jsonError(22);
+        }
+
+        if (!isset($params->to)) {
+            self::jsonError(2);
+        }
+
+        $task = $this->flm()->hotlink($params);
+
+        return $task;
+    }
+
     public function filesMove($params)
     {
 

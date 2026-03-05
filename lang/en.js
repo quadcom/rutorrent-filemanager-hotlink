@@ -4,6 +4,7 @@ theUILang.fType 		= "Type";
 theUILang.fPerm		= 'Permissions';
 theUILang.fOpen		= 'Open';
 theUILang.fCopy		= 'Copy...';
+theUILang.fHotlink		= 'Hardlink...';
 theUILang.fMove		= 'Move...';
 theUILang.fRename		= 'Rename...';
 theUILang.fDelete		= 'Delete';
@@ -86,6 +87,11 @@ theUILang.flm_popup_copy		= 'Copy files and folders';
 theUILang.fDiagCopySel	= 'Files marked for duplication:';
 theUILang.fDiagCopyTo	= 'Copy files to:';
 
+theUILang.flm_popup_hotlink		= 'Hardlink files';
+theUILang.fDiagHotlinkSel	= 'Files marked for hard linking:';
+theUILang.fDiagHotlinkTo	= 'Hardlink destination:';
+theUILang.fDiagHotlinkBut	= 'Hardlink';
+
 theUILang.flm_popup_nfo_view		= 'Text File Viewer';
 
 theUILang.flm_popup_checksum_check	= 'Checksum File Verification';
@@ -131,7 +137,8 @@ theUILang.fStarts = {
 	check_sfv: 	'File checking started',
 	create_sfv:	'File hashing started',
 	move:		'File relocation started',
-	copy:		'File duplication started'
+	copy:		'File duplication started',
+	hotlink:	'Hard linking started'
 };
 
 theUILang.fStops = {

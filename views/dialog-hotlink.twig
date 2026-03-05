@@ -1,0 +1,40 @@
+{% set pathbrowse = currentPath %}
+{% set multiselect = 1 %}
+{% set multiselectFilesOnly = false %}
+{% set startButtonValue = theUILang.fDiagHotlinkBut %}
+
+{% extends "flm::dialog-window.twig" %}
+{% block heading %}
+    <legend>{{ theUILang.fDiagHotlinkSel }}</legend>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        if (!flm.ui.hasOwnProperty('dialogHotlink')) {
+
+            flm.ui.dialogHotlink = function (dialogs) {
+                const diagId = dialogs.getCurrentDialog();
+                let pathBrowser = dialogs.dirBrowserInput(diagId);
+                let entries = dialogs.getCheckedList(diagId);
+
+                let self = this;
+
+                self.updateFilePath = function () {
+                    let filePath = flm.utils.replaceFilePath(pathBrowser.val(), pathBrowser.data('previousValue'));
+                    dialogs.updateTargetPath(diagId, filePath);
+                };
+
+                dialogs.onStart(() => flm.actions.doHotlink(dialogs.getCheckList(diagId), pathBrowser));
+
+                pathBrowser.change(self.updateFilePath);
+
+                if (entries.length === 1) {
+                    pathBrowser.data('previousValue', 'Hardlink of ' + flm.utils.basename(entries[0]))
+                        .change();
+                }
+
+            }
+        }
+        (flm.ui.dialogHotlink)(flm.ui.getDialogs());
+    </script>
+{% endblock %}

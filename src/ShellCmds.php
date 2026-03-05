@@ -21,6 +21,20 @@ class ShellCmds
         return ShellCmd::bin('cp', ['-rp', $source, $to]);
     }
 
+    /**
+     * Hard-link $source into $to using `cp -rl`.
+     * Works for both files and directories (mirrors dir tree, hard-links files).
+     * Source and destination must be on the same filesystem.
+     *
+     * @param $source
+     * @param $to
+     * @return ShellCmd
+     */
+    public static function hardLink($source, $to): ShellCmd
+    {
+        return ShellCmd::bin('cp', ['-rl', $source, $to]);
+    }
+
     public static function recursiveMove($file, $to): ShellCmd
     {
         return ShellCmd::bin('mv', ['-f', $file, $to]);

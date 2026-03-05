@@ -87,6 +87,15 @@ export function apiClient(endpoint) {
 
     };
 
+    client.hotlink = function (files, to) {
+        return this.runTask("hotlink", {
+            method: 'filesHotlink',
+            to: to,
+            fls: files
+        });
+
+    };
+
     client.move = function (files, to) {
         return this.runTask("move", {
             method: 'filesMove',
