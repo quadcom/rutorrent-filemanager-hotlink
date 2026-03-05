@@ -1,4 +1,8 @@
-# rutorrent-filemanager
+# rutorrent-filemanager-hotlink
+
+# Basically the same plugin as Nelu's but with hotlink functionality added to the context menu. While autotools will hotlink DL's to a secondary folder, I found that I needed to copy a seed to my remote sync folder numerous times. Using the copy command in the FileManager plugin would do the job but by creating a duplicate, taking up space and time doing so. Adding hotlinking to the plugin solves this problem.
+
+
 [![Docker Multiarch Build](https://github.com/nelu/rutorrent-filemanager/actions/workflows/docker-image.yml/badge.svg)](https://hub.docker.com/r/unzel/rutorrent-filemanager/tags)
 
 ruTorrent file management plugin with a javascript user interface running on rTorrent bittorrent client
