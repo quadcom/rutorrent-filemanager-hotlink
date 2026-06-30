@@ -1,6 +1,4 @@
-plugin.description: Plugin that provides file management functionality in the UI.
-plugin.author: HWK
-plugin.version: 1.5.1
-rtorrent.remote: error
-rtorrent.external.error: php,pgrep,find
-plugin.dependencies: _task
+plugin.description: Adds a Hotlink (hard link) option to the filemanager context menu, directly below Copy.
+plugin.author: Quadcom
+plugin.version: 1.1
+plugin.dependencies: filemanager

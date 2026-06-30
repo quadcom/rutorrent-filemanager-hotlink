@@ -11,8 +11,9 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Please complete the following information:**
- - filemanager version: [e.g. v1.5.0, master]
- - rutorrent version: [e.g. v1.5.0, master]
+ - hotlink plugin version: [e.g. v1.1]
+ - filemanager plugin version: [e.g. v1.5.1, master]
+ - rutorrent version: [e.g. v5.2, master]
  - web server: [e.g.  apache 2.2, nginx]
  - php version: [e.g. 8.3]
  - Browser: [e.g. chrome, safari]

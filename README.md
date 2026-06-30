@@ -1,47 +1,71 @@
 # rutorrent-filemanager-hotlink
 
-### Basically the same plugin as Nelu's but with hotlink functionality added to the context menu. While autotools will hotlink DL's to a secondary folder, I found that I needed to copy a seed to my remote sync folder numerous times. Using the copy command in the FileManager plugin would do the job but by creating a duplicate, taking up space and time doing so. Adding hotlinking to the plugin solves this problem.
+A small [ruTorrent](https://github.com/Novik/ruTorrent) plugin that adds a
+**Hotlink** (hard link) entry to the
+[filemanager](https://github.com/nelu/rutorrent-filemanager) right-click menu,
+directly below **Copy**.
 
-<img width="96" height="201" alt="image" src="https://github.com/user-attachments/assets/26b7e3e2-0950-42f2-9143-64b0a0de914d" />
+While autotools can hardlink downloads to a secondary folder, copying a seed to
+a remote sync folder with the filemanager's *Copy* creates a full duplicate —
+wasting space and time. *Hotlink* creates hard links instead: the same data at a
+new path, near-instant and with zero extra disk usage.
 
+<img width="96" height="201" alt="hotlink menu entry" src="https://github.com/user-attachments/assets/26b7e3e2-0950-42f2-9143-64b0a0de914d" />
 
-[![Docker Multiarch Build](https://github.com/nelu/rutorrent-filemanager/actions/workflows/docker-image.yml/badge.svg)](https://hub.docker.com/r/unzel/rutorrent-filemanager/tags)
+## Requirements
 
-ruTorrent file management plugin with a javascript user interface running on rTorrent bittorrent client
-### Features
-- supported file operations: copy, move, delete, rename, archive, extract, checksum, view, file info
-- file checksum functionality with multiple alogorithms supported: sfv, sha256
-- text/nfo viewer, with configurable text extensions 
-- archive file support, with configurable formats
-- using 7zip for archive related and file checksum operations
-- option to run all operations as chroot user
-- jailed home dir support
-- using twigjs for views
-- integrated menu in Files tab
-- hotkey shortcuts for file operations: copy (ctrl+c), move (ctrl+x), paste (ctrl+v), delete, rename (F2)
+- ruTorrent
+- The [filemanager](https://github.com/nelu/rutorrent-filemanager) plugin — this
+  plugin extends its context menu and reuses its directory picker
+  (declared via `plugin.dependencies: filemanager`)
+- A filesystem that supports hard links. The source and destination must live on
+  the **same** filesystem — hard links cannot span devices.
 
-### Configuration
-The plugin configuration with all it's options can be edited in ``conf.php`` inside the plugin directory.
+## Installation
 
-See the **[Configuration section](https://github.com/nelu/rutorrent-filemanager/wiki#configuration)** in the plugin 
-[Wiki](https://github.com/nelu/rutorrent-filemanager/wiki) page for information regarding the available settings and how they work.
+Install into ruTorrent's `plugins` directory under the name `hotlink`:
 
-### Support 
-Take a look at the [Wiki](https://github.com/nelu/rutorrent-filemanager/wiki) for more information.
+```sh
+cd /path/to/rutorrent/plugins
+git clone https://github.com/quadcom/rutorrent-filemanager-hotlink.git hotlink
+```
 
-You can open a new issue regarding your problem or discuss it directly on telegram: [https://t.me/filemanagerplugin](https://t.me/filemanagerplugin). 
+The deployed layout must be:
 
-Also you can contribute with feature suggestions, fixes and documentation at any time.
+```
+plugins/hotlink/
+  action.php
+  conf.php
+  init.js
+  plugin.info
+```
 
+Then reload ruTorrent (hard-refresh the browser so the new `init.js` is loaded).
 
-See these additional filemanager plugins for extended functionality:
+## Usage
 
-- [filemanager-media](https://github.com/nelu/rutorrent-filemanager-media): Media view and screenshots
-- [filemanager-share](https://github.com/nelu/rutorrent-filemanager-share): File sharing functionality
+1. In the **Files** tab, select one or more files/folders.
+2. Right-click and choose **Hotlink** (just below *Copy*).
+3. Browse to — or type — the destination folder (relative to the file manager
+   root) and click **Create Hotlink**.
 
-### Thanks
-Many thanks to all contributors, users and the projects behind this plugin:
-- [ruTorrent](https://github.com/Novik/ruTorrent)
-- [rtorrent](https://github.com/rakshasa/rtorrent)
-- [7Zip](https://www.7-zip.org/)
-- [twig.js](https://github.com/twigjs/twig.js)
+A hard link to every selected item is created in the destination. Directories
+are recreated and their files hard-linked recursively. Name collisions are
+avoided by appending `_1`, `_2`, …
+
+## Notes
+
+- Hard links **cannot cross filesystems.** If the destination is on a different
+  device/mount than the source, the OS returns an error, which is surfaced in
+  the ruTorrent notification.
+- Source and destination paths are resolved inside ruTorrent's configured top
+  directory (the jail); any attempt to escape it is rejected.
+- The destination dialog uses ruTorrent's native dialog manager and the
+  filemanager's own directory browser (which requires the standard `_getdir`
+  plugin). If `_getdir` is unavailable, the destination field still accepts a
+  manually typed path.
+
+## Credits
+
+- Hotlink plugin by **Quadcom**.
+- Built on and requires [nelu/rutorrent-filemanager](https://github.com/nelu/rutorrent-filemanager).
