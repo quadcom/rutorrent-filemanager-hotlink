@@ -110,45 +110,103 @@
     // -----------------------------------------------------------------------
     // Dialog
     // -----------------------------------------------------------------------
+    var DIALOG_ID = 'hotlinkDialog';
+    var INPUT_ID  = 'hl-dest-input';
+
+    // Tear down any directory picker that the filemanager attached to a previous
+    // instance of this dialog (it appends a browse button + a floating list that
+    // must be removed, or they leak / stack across reopens).
+    function destroyPicker() {
+        try {
+            var dlgs = flm.ui.getDialogs();
+            var map = dlgs.getDirBrowser(DIALOG_ID); // {inputId: FlmDirBrowser} | false
+            if (map) {
+                for (var k in map) {
+                    if (Object.prototype.hasOwnProperty.call(map, k)) {
+                        try { map[k].hide(false); } catch (e) {}
+                        dlgs.deleteDirBrowser(DIALOG_ID, k);
+                    }
+                }
+            }
+        } catch (ex) {}
+    }
+
+    function closeDialog() {
+        destroyPicker();
+        try { theDialogManager.hide(DIALOG_ID); } catch (ex) {}
+    }
+
     function showDialog() {
         var paths = collectPaths();
 
         var cwd = '';
         try { cwd = flm.getCurrentPath() || ''; } catch (ex) {}
 
-        var $input = $('<input>')
-            .attr({ type: 'text', id: 'hl-dest-input' })
-            .css({ width: '100%', 'box-sizing': 'border-box', 'font-family': 'monospace', 'font-size': '12px' })
-            .val(cwd);
+        // ruTorrent ships only a trimmed jQuery UI build that does NOT include
+        // the `dialog` widget, so $.fn.dialog is undefined here. Use ruTorrent's
+        // native dialog manager instead -- the very same API the host
+        // filemanager uses (see js/ui-dialogs.js: theDialogManager.make/show/hide).
+        //
+        // The destination input carries the `flm-diag-nav-path` class and a fixed
+        // id so we can hand it to the filemanager's own directory picker
+        // (FlmDirBrowser) via getDialogs().createDirBrowser() below -- the exact
+        // same picker the Copy/Move dialogs use.
+        var content =
+            '<div class="cont" style="padding:8px;min-width:480px;">' +
+                '<p style="margin:0 0 6px;">' +
+                    'Destination folder for the hotlink(s):' +
+                '</p>' +
+                '<div class="row"><div class="input-group mb-3">' +
+                    '<input class="form-control m-0 p-1 flm-diag-nav-path" ' +
+                        'id="' + INPUT_ID + '" type="text" value="">' +
+                '</div></div>' +
+                '<p style="margin:8px 0 0;font-size:11px;color:#888;">' +
+                    paths.length + ' item(s) selected' +
+                '</p>' +
+                '<div class="buttons-list" style="margin-top:12px;text-align:right;">' +
+                    '<button type="button" id="hl-create-btn" class="Button">Create Hotlink</button> ' +
+                    '<button type="button" id="hl-cancel-btn" class="Button Cancel">Cancel</button>' +
+                '</div>' +
+            '</div>';
 
-        var $dlg = $('<div>').css('padding', '4px').append(
-            $('<label>').css({ display: 'block', 'margin-bottom': '6px' })
-                        .text('Destination folder (relative to the file manager root):'),
-            $input,
-            $('<p>').css({ margin: '8px 0 0', 'font-size': '11px', color: '#888' })
-                    .text(paths.length + ' item(s) selected')
-        );
+        // Rebuild fresh each time -- selection and current path may have changed.
+        destroyPicker();
+        try {
+            if (theDialogManager.items && theDialogManager.items[DIALOG_ID]) {
+                theDialogManager.hide(DIALOG_ID);
+            }
+        } catch (ex) {}
+        $('#' + DIALOG_ID).remove();
+        try { if (theDialogManager.items) delete theDialogManager.items[DIALOG_ID]; } catch (ex) {}
 
-        $dlg.dialog({
-            title:     'Create Hotlink(s)',
-            width:     520,
-            modal:     true,
-            resizable: false,
-            close:     function () { $(this).dialog('destroy').remove(); },
-            buttons: [{
-                text:  'Create Hotlink',
-                click: function () {
-                    var dest = $('#hl-dest-input').val();
-                    dest = dest ? $.trim(dest) : '';
-                    if (!dest) return;
-                    $(this).dialog('close');
-                    doHotlink(paths, dest);
-                }
-            }, {
-                text:  'Cancel',
-                click: function () { $(this).dialog('close'); }
-            }]
+        // make(id, title, contentHtml, isModal)
+        theDialogManager.make(DIALOG_ID, 'Create Hotlink(s)', content, true);
+
+        var $root = $('#' + DIALOG_ID);
+        var $input = $root.find('#' + INPUT_ID).val(cwd);
+
+        // Attach the filemanager's native directory picker (adds a browse button
+        // next to the input + a navigable folder list). Requires the `_getdir`
+        // plugin, which the filemanager itself depends on; if it is unavailable
+        // the input still works for manual entry.
+        try { flm.ui.getDialogs().createDirBrowser(DIALOG_ID); } catch (ex) {}
+
+        function submit() {
+            var dest = $input.val();
+            dest = dest ? $.trim(dest) : '';
+            if (!dest) return;
+            closeDialog();
+            doHotlink(paths, dest);
+        }
+
+        $root.find('#hl-create-btn').on('click', submit);
+        $root.find('#hl-cancel-btn').on('click', closeDialog);
+        $input.on('keydown', function (e) {
+            if (e.keyCode === 13) { e.preventDefault(); submit(); }
         });
+
+        theDialogManager.show(DIALOG_ID);
+        setTimeout(function () { $input.select().focus(); });
     }
 
     // -----------------------------------------------------------------------
